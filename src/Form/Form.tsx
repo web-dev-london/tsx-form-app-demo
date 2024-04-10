@@ -1,5 +1,5 @@
 import { PhoneIcon } from "@chakra-ui/icons";
-import { Button, Checkbox, Container, FormControl, FormHelperText, FormLabel, HStack, Input, InputGroup, InputLeftElement, InputRightElement, NumberDecrementStepper, NumberIncrementStepper, NumberInput, NumberInputField, NumberInputStepper, Radio, RadioGroup, Select } from "@chakra-ui/react";
+import { Button, Checkbox, Container, FormControl, FormErrorMessage, FormHelperText, FormLabel, HStack, Input, InputGroup, InputLeftElement, InputRightElement, NumberDecrementStepper, NumberIncrementStepper, NumberInput, NumberInputField, NumberInputStepper, Radio, RadioGroup, Select, Stack } from "@chakra-ui/react";
 import { ChangeEvent, FormEvent, useState } from "react";
 
 
@@ -9,24 +9,70 @@ const Form = () => {
     const [show1, setShow1] = useState(false);
     const [show2, setShow2] = useState(false);
     const [name, setName] = useState('');
+    const [nameMessage, setNameMessage] = useState('');
+    const nameInvalid = nameMessage !== '';
     const [lastName, setLastName] = useState('');
+    const [lastNameMessage, setLastNameMessage] = useState('');
+    const lastNameInvalid = lastNameMessage !== '';
     const [email, setEmail] = useState('');
+    const [emailMessage, setEmailMessage] = useState('');
+    const emailInvalid = emailMessage !== '';
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
+    const [passwordMessage, setPasswordMessage] = useState('')
+    const passwordInvalid = passwordMessage !== '';
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [confirmPasswordMessage, setConfirmPasswordMessage] = useState('');
+    const confirmPasswordMessageInvalid = confirmPasswordMessage !== '';
     const [age, setAge] = useState('');
     const [country, setCountry] = useState('');
     const [sport, setSport] = useState(false);
     const [reading, setReading] = useState(false);
-    const [codding, setCodding] = useState('codding')
-    const [swimming, setSwimming] = useState('swimming');
+    const [codding, setCodding] = useState('')
     const [date, setDate] = useState('');
 
     const handleShow1 = () => setShow1(!show1)
     const handleShow2 = () => setShow2(!show2)
 
+    const validateForm = () => {
+        if (!name) {
+            setNameMessage('Name is required.')
+            return
+        }
+        if (!lastName) {
+            setLastNameMessage('Last Name is required.')
+            return
+        }
+
+        if (!email.match(/^\S+@\S+\.\S+$/)) {
+            setEmailMessage('Email is required.')
+            return
+        }
+
+        const isValidPassword = (password: string) => {
+            const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@.#$!%*?&^])[A-Za-z\d@.#$!%*?&]{8,30}$/;
+            return regex.test(password)
+        }
+
+        if (!password) {
+            setPasswordMessage('Password is required.')
+        } else if (!isValidPassword(password)) {
+            setPasswordMessage(`Password must be at least 8 character long and contain at leat one symbol, one number, one lowercase one uppercase`)
+        }
+
+        if (!confirmPassword) {
+            setConfirmPasswordMessage('Confirm password is required.')
+        } else if (confirmPassword !== password) {
+            setConfirmPasswordMessage('Password does not mutch.')
+        }
+
+    }
+
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
+
+        validateForm();
+
 
         setName('');
         setLastName('');
@@ -39,7 +85,6 @@ const Form = () => {
         setSport(false);
         setReading(false);
         setCodding('');
-        setSwimming('');
         setDate('');
     }
 
@@ -84,15 +129,6 @@ const Form = () => {
         setReading(e.target.checked)
     }
 
-    const handleCodding = (e: ChangeEvent<HTMLInputElement>) => {
-        console.log(e.target.value);
-        setCodding(e.target.value)
-    }
-
-    const handleSwimming = (e: ChangeEvent<HTMLInputElement>) => {
-        console.log(e.target.value);
-        setSwimming(e.target.value)
-    }
 
     const handleDate = (e: ChangeEvent<HTMLInputElement>) => {
         setDate(e.target.value)
@@ -110,7 +146,6 @@ const Form = () => {
         setSport(false);
         setReading(false);
         setCodding('');
-        setSwimming('');
         setDate('');
     }
 
@@ -118,15 +153,18 @@ const Form = () => {
         <>
             <Container maxW='md' py={10}>
                 <form id="formField" onSubmit={handleSubmit}>
-                    <FormControl isRequired>
+                    <FormControl isInvalid={nameInvalid}>
                         <FormLabel>First name </FormLabel>
                         <Input
                             onChange={handleChangeName}
                             value={name}
                             type="text"
-                            placeholder='First name' />
+                            placeholder='First name'
+                        />
+                        {/* <FormHelperText>At least 10 characters</FormHelperText> */}
+                        <FormErrorMessage>{nameMessage}</FormErrorMessage>
                     </FormControl>
-                    <FormControl isRequired>
+                    <FormControl isInvalid={lastNameInvalid}>
                         <FormLabel>Last Name</FormLabel>
                         <Input
                             onChange={handleLastName}
@@ -134,17 +172,19 @@ const Form = () => {
                             type="text"
                             placeholder='Last name'
                         />
+                        <FormErrorMessage>{lastNameMessage}</FormErrorMessage>
                     </FormControl>
-                    <FormControl isRequired>
+                    <FormControl isInvalid={emailInvalid}>
                         <FormLabel>Email</FormLabel>
                         <Input
                             onChange={handleEmail}
                             value={email}
-                            type="email"
+                            // type="email"
                             placeholder='Your email'
                         />
+                        <FormErrorMessage>{emailMessage}</FormErrorMessage>
                     </FormControl>
-                    <FormControl isRequired>
+                    <FormControl >
                         <FormLabel>Phone Number</FormLabel>
                         <InputGroup >
                             <InputLeftElement>
@@ -157,8 +197,9 @@ const Form = () => {
                                 placeholder='Phone number'
                             />
                         </InputGroup>
+                        <FormHelperText>(optional)</FormHelperText>
                     </FormControl>
-                    <FormControl isRequired>
+                    <FormControl isInvalid={passwordInvalid}>
                         <FormLabel>Password</FormLabel>
                         <InputGroup>
                             <Input
@@ -176,8 +217,10 @@ const Form = () => {
                                 </Button>
                             </InputRightElement>
                         </InputGroup>
+                        <FormHelperText>At least 8 character</FormHelperText>
+                        <FormErrorMessage>{passwordMessage}</FormErrorMessage>
                     </FormControl>
-                    <FormControl isRequired>
+                    <FormControl isInvalid={confirmPasswordMessageInvalid}>
                         <FormLabel>Confirm Password</FormLabel>
                         <InputGroup>
                             <Input
@@ -195,6 +238,8 @@ const Form = () => {
                                 </Button>
                             </InputRightElement>
                         </InputGroup>
+                        <FormHelperText>At least 8 character</FormHelperText>
+                        <FormErrorMessage>{confirmPasswordMessage}</FormErrorMessage>
                     </FormControl>
                     <FormControl>
                         <FormLabel>Age</FormLabel>
@@ -229,40 +274,41 @@ const Form = () => {
                         <FormLabel >
                             Hobbies
                         </FormLabel>
-                        <HStack>
-                            <HStack spacing='24px'>
-                                <Checkbox
-                                    onChange={handleSport}
-                                    isChecked={sport}
-                                    id="sport"
-                                >
-                                    Sport
-                                </Checkbox>
-                                <Checkbox
-                                    onChange={handleReading}
-                                    isChecked={reading}
-                                    id="reading"
-                                >
-                                    Reading
-                                </Checkbox>
-                            </HStack>
-                            <RadioGroup >
-                                <HStack>
+                        <HStack spacing={6}>
+                            <Checkbox
+                                onChange={handleSport}
+                                isChecked={sport}
+                                id="sport"
+                            >
+                                Sport
+                            </Checkbox>
+                            <Checkbox
+                                onChange={handleReading}
+                                isChecked={reading}
+                                id="reading"
+                            >
+                                Reading
+                            </Checkbox>
+                            <RadioGroup
+                                onChange={setCodding}
+                                value={codding}
+                            >
+                                <Stack
+                                    spacing={7}
+                                    direction='row'>
                                     <Radio
-                                        onChange={handleCodding}
-                                        value={codding}
                                         colorScheme="green"
+                                        value="codding"
                                     >
                                         Codding
                                     </Radio>
                                     <Radio
-                                        onChange={handleSwimming}
                                         colorScheme="blue"
-                                        value={swimming}
+                                        value="swimming"
                                     >
                                         Swimming
                                     </Radio>
-                                </HStack>
+                                </Stack>
                             </RadioGroup>
                         </HStack>
                         <FormHelperText>Select only if you're a fan.</FormHelperText>
@@ -276,10 +322,10 @@ const Form = () => {
                             type="datetime-local"
                         />
                     </FormControl>
-                    <HStack my={5} spacing={10}>
+                    <HStack my={8} spacing={20}>
                         <Button type="submit">Submit</Button>
+                        <Button onClick={reset}>Reset</Button>
                     </HStack>
-                    <Button onClick={reset}>Reset</Button>
                 </form>
             </Container >
         </>
